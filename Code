@@ -1,0 +1,37 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial rs232Serial(D7, D8); // RX, TX
+String message = "";
+
+void setup() {
+  Serial.begin(9600);
+  rs232Serial.begin(9600);
+  Serial.println("NodeMCU ready for RS232 full strings");
+}
+
+void loop() {
+  if (rs232Serial.available()) {
+    char c = rs232Serial.read();
+
+    // Accumulate the message
+    if (c == '\n' || c == '\r') {
+      if (message.length() > 0) {
+        Serial.print("Received from RS232: ");
+        Serial.println(message);
+
+        // Echo back to PuTTY
+        rs232Serial.print("Echo: ");
+        rs232Serial.println(message);
+
+        message = ""; // Clear for next
+      }
+    } else {
+      message += c;
+    }
+  }
+
+  // Optional: Serial Monitor → RS232
+  if (Serial.available()) {
+    rs232Serial.write(Serial.read());
+  }
+}
